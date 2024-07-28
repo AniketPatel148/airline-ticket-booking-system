@@ -85,5 +85,44 @@ describe("Seat Controller", () => {
 				error: "Only admin can reset seats",
 			});
 		});
+
+		test("reserveSeat should handle invalid seat number", async () => {
+			req.body.seatNumber = 301;
+
+			await seatController.reserveSeat(req, res);
+
+			expect(res.status).toHaveBeenCalledWith(400);
+			expect(res.json).toHaveBeenCalledWith({ error: "Invalid seat number" });
+		});
+
+		test("reserveSeat should handle already reserved seat", async () => {
+			Seat.findOne.mockResolvedValue({ seatNumber: 1, isReserved: true });
+
+			await seatController.reserveSeat(req, res);
+
+			expect(res.status).toHaveBeenCalledWith(400);
+			expect(res.json).toHaveBeenCalledWith({ error: "Seat already reserved" });
+		});
+
+		test("resetSeats should handle non-admin user", async () => {
+			req.user = { isAdmin: false };
+
+			await seatController.resetSeats(req, res);
+
+			expect(res.status).toHaveBeenCalledWith(403);
+			expect(res.json).toHaveBeenCalledWith({
+				error: "Only admin can reset seats",
+			});
+		});
+
+		test("resetSeats should handle server errors", async () => {
+			req.user = { isAdmin: true };
+			Seat.updateMany.mockRejectedValue(new Error("Database error"));
+
+			await seatController.resetSeats(req, res);
+
+			expect(res.status).toHaveBeenCalledWith(500);
+			expect(res.json).toHaveBeenCalledWith({ error: "Server error" });
+		});
 	});
 });
