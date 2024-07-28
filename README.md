@@ -234,3 +234,4 @@ To run tests and get test coverage, use:
 ```bash
 npm test
 ```
+![test-coverage report](https://github.com/user-attachments/assets/dbab5bd4-7e29-4ab8-b480-dce14b1b655a)
